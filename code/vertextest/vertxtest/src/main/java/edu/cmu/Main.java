@@ -4,111 +4,86 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonArray;
 
-import java.math.BigInteger;
-import org.json.*;
+import org.json.JSONObject;
 
 public class Main {
-//  public static void main(String[] args) {
-//    Vertx vertx = Vertx.vertx();
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
 
-//    HttpServer server = vertx.createHttpServer();
+    HttpServer server = vertx.createHttpServer();
 
-//    server.requestHandler(request -> {
-//      // Get the encoded part
-//      String info = request.getParam("cc");
+    server.requestHandler(request -> {
+      // Get the encoded part
+      String info = request.getParam("cc");
+      
+      String result = decode(info);
 
-//      // Decode using URL-SAFE Base64
-//      Base64.Decoder d = Base64.getUrlDecoder();
-//      byte[] decodedBytes = d.decode(info);
+      // Create response
+      HttpServerResponse response = request.response();
+      response.putHeader("content-type", "text/plain");
+      JSONObject original = new JSONObject(result);
+      original.getJSONArray("chain").put(Functions.getNewBlock(result));
+      original.remove("new_target");
+      original.remove("new_tx");     
 
-//      // Inflate zlib compress
-//      Inflater decompresser = new Inflater();
-//      decompresser.setInput(decodedBytes);
-//      ByteArrayOutputStream outputStream = new ByteArrayOutputStream(decodedBytes.length);
-//      byte[] buffer = new byte[1024];
-//      while (!decompresser.finished()) {
-//        int count;
-//        try {
-//          count = decompresser.inflate(buffer);
-//          outputStream.write(buffer, 0, count);
-//        } catch (DataFormatException e) {
-//          e.printStackTrace();
-//        }
-//      }
-//      try {
-//        outputStream.close();
-//      } catch (IOException e) {
-//        e.printStackTrace();
-//      }
-//      byte[] output = outputStream.toByteArray();
+      Deflater compresser = new Deflater();
+      int compressedDataLength = 0;
+      compresser.setInput(original.toString().getBytes());
+      compresser.finish();
+      ByteArrayOutputStream o = new ByteArrayOutputStream(original.toString().getBytes().length);
+      byte[] compress_result_bytes = new byte[1024];
 
-//      // Get the decoded message, in String
-//      String result = new String(output);
+      while (!compresser.finished()) {
+        compressedDataLength = compresser.deflate(compress_result_bytes);
+        o.write(compress_result_bytes, 0, compressedDataLength);
+      }
 
-//      // Create response
-//      HttpServerResponse response = request.response();
-//      response.putHeader("content-type", "text/plain");
-//      response.end(String.format("Got%s%n", result));
-//    });
+      compresser.end();
+      byte[] compress_result = o.toByteArray();
+      String url_encoded = new String(Base64.getUrlEncoder().encode(compress_result));
 
-//    // Set the port to listen
-//    server.listen(88, "localhost");
-//  }
+      response.end(String.format("%s,%s%n%s", "HUNTERs", "752696750380", url_encoded));
+    });
 
-
-
-public static String GROUP_ID = "123";
-public static String e = "5";
-public static String n = "91";
-public static void main(String[] args){
-  System.out.println("result:" + getSig("23", e, n));
-}
-
-/**
-*
-* @param num integer value of message
-* @param e exponential
-* @param n
-* @return
-*/
-public static Long getSig(String a, String e, String n) {
-  // create a BigInteger exponent
-  BigInteger num = new BigInteger(a);
-  BigInteger exponent = new BigInteger(e);
-  BigInteger mod = new BigInteger(n);
-
-  // perform modPow operation on num using exp and mod
-
-  return Long.parseLong(num.modPow(exponent, mod).toString());
-}
-
-public static JsonArray updateNewTx(String request){
-  JSONArray ja = new JSONArray(request);
-  for(int i = 0; i < ja.length(); i++){
-    JSONObject jo = ja.getJSONObject(i);
-    // if the JSONObject has signature, no need to complete
-    if(hasSig(jo)){
-      continue;
-    }
-    else{
-      jo.append("send", GROUP_ID);
-      jo.append("fee", 0);
-      //need the integer value of the transaction s
-      hash = getHash(jo, false);
-      jo.append("hash", hash);
-      //get the signature of the hash
-      jo.append("sig", getSig(hash, e, n));
-    }
-    return ja;
+    // Set the port to listen
+    server.listen(8888, "localhost");
   }
-  
 
+  public static String decode(String info){
+     // Decode using URL-SAFE Base64
+     Base64.Decoder d = Base64.getUrlDecoder();
+     byte[] decodedBytes = d.decode(info);
 
+     // Inflate zlib compress
+     Inflater decompresser = new Inflater();
+     decompresser.setInput(decodedBytes);
+     ByteArrayOutputStream outputStream = new ByteArrayOutputStream(decodedBytes.length);
+     byte[] buffer = new byte[1024];
+     while (!decompresser.finished()) {
+       int count;
+       try {
+         count = decompresser.inflate(buffer);
+         outputStream.write(buffer, 0, count);
+       } catch (DataFormatException e) {
+         e.printStackTrace();
+       }
+     }
+     try {
+       outputStream.close();
+     } catch (IOException e) {
+       e.printStackTrace();
+     }
+     byte[] output = outputStream.toByteArray();
+
+     // Get the decoded message, in String
+     String result = new String(output);
+     return result;
+  }
 }

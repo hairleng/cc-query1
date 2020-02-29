@@ -11,6 +11,17 @@
   </properties>    
 
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/org.json/json -->
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20190722</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.11</version>
+    </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
@@ -21,13 +32,6 @@
       <artifactId>vertx-web</artifactId>
         <version>${vertx.version}</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.json/json -->
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20190722</version>
-    </dependency>
-
     <!-- Uncomment if you want to enable clustering with Hazelcast
     <dependency>
         <groupId>io.vertx</groupId>
