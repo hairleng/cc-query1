@@ -105,7 +105,7 @@ public class Functions {
   public static JSONObject getRewardTx(String request) {
     JSONObject last_All_block = getLastData(new JSONObject(request), "chain");
     int id = getInt(last_All_block, "id");
-    int reward = getRewardAmt(id);
+    int reward = getRewardAmt(id + 1);
     JSONObject result = new JSONObject();
     result.put("recv", 1097844002039l);
     result.put("amt", reward);
