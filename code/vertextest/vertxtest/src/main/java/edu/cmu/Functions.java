@@ -154,8 +154,8 @@ public class Functions {
     public static String[] getPowAndHash(String s, String target) {
         String sha256Decoded = org.apache.commons.codec.digest.DigestUtils.sha256Hex(s);
         // System.out.println(sha256Decoded);
-        String first_8_hex_characters_try = org.apache.commons.codec.digest.DigestUtils.sha256Hex(sha256Decoded + 12)
-                .substring(0, 8);
+        // String first_8_hex_characters_try = org.apache.commons.codec.digest.DigestUtils.sha256Hex(sha256Decoded + 12)
+        //         .substring(0, 8);
         // System.out.println(first_8_hex_characters_try);
         // System.out.println(first_8_hex_characters_try.compareTo(target));
         String[] result = new String[2];

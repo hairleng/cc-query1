@@ -101,13 +101,21 @@ public class Validator {
 
             // check
             String target = object.getString("target");
-            String pow = Functions.getPowAndHash(code, target)[0];
-            String hash = Functions.getPowAndHash(code, target)[1];
+            String pow = object.getString("pow");
+            // String pow = Functions.getPowAndHash(code, target)[0];
+            // String hash = Functions.getPowAndHash(code, target)[1];
 
-            if (!pow.equals(object.getString("pow")) || !hash.equals(object.getString("hash"))) {
-                // System.out.println("NOT Equal");
-                return "ERROR IN HASH OR POW";
+            String toBeEncoded = org.apache.commons.codec.digest.DigestUtils.sha256Hex(code) + pow;
+            String realHash = org.apache.commons.codec.digest.DigestUtils.sha256Hex(toBeEncoded).substring(0, 8);
+            if(!realHash.equals(object.getString("hash")) || realHash.compareTo(target) > 0) {
+                return "ERROR IN HASH  & POW";
             }
+            
+
+            // if (!pow.equals(object.getString("pow")) || !hash.equals(object.getString("hash"))) {
+            //     // System.out.println("NOT Equal");
+            //     return "ERROR IN HASH OR POW";
+            // }
         }
         return "0";
     }
